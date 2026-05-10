@@ -1,0 +1,66 @@
+(ns ren-finance.model.events
+  (:require [re-dash.core :as rd]
+            [ren-finance.model.effects :as effects]))
+
+(rd/reg-event-db
+ :initialize
+ (fn [db _]
+   (assoc db
+          :active-tab 0
+          :net-worth nil
+          :accounts []
+          :transactions {:items [] :total 0 :loading? false}
+          :settings {:base-currency :USD :wallets []}
+          :import {:status :idle :preview-rows [] :result nil :error nil}
+          :cache {}
+          :ui {:loading? false :error nil :offline? false})))
+
+(rd/reg-event-db
+ :set-active-tab
+ (fn [db [_ tab]]
+   (assoc db :active-tab tab)))
+
+(rd/reg-event-fx
+ :load-dashboard
+ (fn [{:keys [db]} _]
+   {:fetch-net-worth nil
+    :fetch-settings nil}))
+
+(rd/reg-event-db
+ :net-worth-loaded
+ (fn [db [_ data]]
+   (assoc-in db [:net-worth] data)))
+
+(rd/reg-event-db
+ :settings-loaded
+ (fn [db [_ data]]
+   (assoc-in db [:settings] data)))
+
+(rd/reg-event-db
+ :set-base-currency
+ (fn [db [_ currency]]
+   (assoc-in db [:settings :base-currency] currency)))
+
+(rd/reg-event-fx
+ :save-base-currency
+ (fn [{:keys [db]} [_ currency]]
+   {:save-setting {:currency currency}}))
+
+(rd/reg-event-db
+ :setting-saved
+ (fn [db _] db))
+
+(rd/reg-event-fx
+ :import-csv
+ (fn [{:keys [db]} [_ file-path mapping]]
+   {:import-csv {:file-path file-path :mapping mapping}}))
+
+(rd/reg-event-db
+ :import-completed
+ (fn [db [_ result]]
+   (assoc-in db [:import :result] result)))
+
+(rd/reg-event-db
+ :set-offline
+ (fn [db [_ offline?]]
+   (assoc-in db [:ui :offline?] offline?)))

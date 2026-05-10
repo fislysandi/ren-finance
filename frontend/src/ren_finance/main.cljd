@@ -1,0 +1,19 @@
+(ns ren-finance.main
+  (:require [cljd.flutter :as f]
+            [ren-finance.theme.colors :as colors]
+            [ren-finance.model.subs :as subs]
+            [ren-finance.model.events :as events]
+            [ren-finance.views.dashboard :as dashboard]
+            [ren-finance.views.import :as import-view]
+            [ren-finance.views.settings :as settings-view]))
+
+(defn app []
+  (f/material-app
+   {:title "Ren Finance"
+    :theme (f/theme-data
+            {:brightness :dark
+             :color-seed colors/primary
+             :scaffold-background-color colors/canvas-dark})}))
+
+(defn main []
+  (f/run-app (app)))

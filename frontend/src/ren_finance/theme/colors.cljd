@@ -1,0 +1,19 @@
+(ns ren-finance.theme.colors)
+
+;; Canvas
+(def canvas-dark "#000000")
+(def canvas-light "#ffffff")
+(def surface-elevated "#16181a")
+
+;; Brand
+(def primary "#494fdf")
+
+;; Text
+(def ink "#191c1f")
+(def on-dark "#ffffff")
+(def on-dark-muted "#ffffff99")
+
+;; Accents
+(def accent-teal "#00a87e")
+(def accent-danger "#e23b4a")
+(def accent-warning "#ec7e00")

@@ -1,0 +1,18 @@
+(ns ren-finance.views.widgets.button
+  (:require [cljd.flutter :as f]
+            [ren-finance.theme.colors :as colors]
+            [ren-finance.theme.typography :as typography]))
+
+(defn pill-button
+  "Revolut-style pill button, 48px height, rounded.full."
+  [{:keys [label on-pressed color text-color]
+    :or {color "#ffffff"
+         text-color "#000000"}}]
+  (f/elevated-button
+   {:on-pressed on-pressed
+    :style (f/button-style
+            {:padding (f/edge-insets.symmetric :horizontal 24 :vertical 12)
+             :background-color (f/color.hex color)
+             :shape (f/stadium-border)})}
+   (f/text label {:style (f/text-style {:color (f/color.hex text-color)
+                                         :font-size 16})})))

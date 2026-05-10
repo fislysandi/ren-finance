@@ -1,0 +1,25 @@
+(ns ren-finance.views.widgets.nav
+  (:require [cljd.flutter :as f]
+            [ren-finance.theme.colors :as colors]
+            [ren-finance.model.subs :as subs]
+            [ren-finance.model.events :as events]
+            [re-dash.core :as rd]))
+
+(defn nav-bar
+  "Bottom navigation bar with 3 tabs: Dashboard, Import, Settings."
+  []
+  (let [active-tab @(rd/subscribe [:active-tab])]
+    (f/navigation-bar
+     {:selected-index active-tab
+      :on-destination-selected #(rd/dispatch [:set-active-tab %])
+      :background-color (f/color.hex colors/canvas-dark)
+      :height 64
+      :destinations [(f/navigation-destination
+                      {:icon (f/icon-data Icons/home_outlined)
+                       :label "Dashboard"})
+                     (f/navigation-destination
+                      {:icon (f/icon-data Icons/upload_outlined)
+                       :label "Import"})
+                     (f/navigation-destination
+                      {:icon (f/icon-data Icons/settings_outlined)
+                       :label "Settings"})]})))

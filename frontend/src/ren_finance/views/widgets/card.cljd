@@ -1,0 +1,16 @@
+(ns ren-finance.views.widgets.card
+  (:require [cljd.flutter :as f]
+            [ren-finance.theme.colors :as colors]
+            [ren-finance.theme.spacing :as spacing]))
+
+(defn feature-card
+  "Revolut-style card with rounded 20px corners and 32px padding."
+  [{:keys [child margin color]
+    :or {color colors/surface-elevated margin 0}}]
+  (f/container
+   {:margin margin
+    :padding (+ spacing/xl spacing/xl)  ;; 32px
+    :decoration (f/box-decoration
+                 {:color color
+                  :border-radius (f/border-radius.circular 20)})}
+   child))

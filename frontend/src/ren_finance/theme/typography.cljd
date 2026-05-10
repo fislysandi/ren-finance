@@ -1,0 +1,21 @@
+(ns ren-finance.theme.typography)
+
+;; Display
+(def display-xl 80)
+(def display-lg 64)
+(def display-md 48)
+
+;; Headings
+(def heading-lg 32)
+(def heading-md 24)
+(def heading-sm 20)
+
+;; Body
+(def body-lg 16)
+(def body-md 15)
+(def body-sm 14)
+
+;; Label
+(def label-lg 14)
+(def label-md 12)
+(def label-sm 11)

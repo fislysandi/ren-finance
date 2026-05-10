@@ -1,0 +1,16 @@
+(ns ren-finance.api.client
+  (:require [cljd.http :as http]))
+
+(def ^:dynamic *api-base* "/api")
+
+(defn fetch-json
+  "Fetch JSON from backend API endpoint."
+  [path]
+  (http/get (str *api-base* path) {:headers {"Accept" "application/json"}}))
+
+(defn post-json
+  "POST JSON to backend API endpoint."
+  [path body]
+  (http/post (str *api-base* path)
+             {:headers {"Content-Type" "application/json"}
+              :body (js/JSON.stringify (clj->js body))}))

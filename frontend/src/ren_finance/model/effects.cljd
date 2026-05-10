@@ -1,0 +1,24 @@
+(ns ren-finance.model.effects
+  (:require [re-dash.core :as rd]
+            [ren-finance.api.client :as api]))
+
+;; These effects will be implemented in Task 15
+(rd/reg-fx
+ :fetch-net-worth
+ (fn [_]
+   (println "[:fx :fetch-net-worth] Not yet implemented — Task 15")))
+
+(rd/reg-fx
+ :fetch-settings
+ (fn [_]
+   (println "[:fx :fetch-settings] Not yet implemented — Task 15")))
+
+(rd/reg-fx
+ :save-setting
+ (fn [_]
+   (println "[:fx :save-setting] Not yet implemented — Task 15")))
+
+(rd/reg-fx
+ :import-csv
+ (fn [_]
+   (println "[:fx :import-csv] Not yet implemented — Task 15")))
