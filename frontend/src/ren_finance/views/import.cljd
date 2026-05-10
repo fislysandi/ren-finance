@@ -1,0 +1,185 @@
+(ns ren-finance.views.import
+  (:require [cljd.flutter :as f]
+            [re-dash.core :as rd]
+            [ren-finance.theme.colors :as colors]
+            [ren-finance.theme.typography :as typography]
+            [ren-finance.theme.spacing :as spacing]
+            [ren-finance.views.widgets.card :as card]
+            [ren-finance.views.widgets.button :as btn]
+            [ren-finance.model.events :as events]))
+
+(defn- file-picker-section
+  "File picker card for CSV selection."
+  [{:keys [on-file-picked]}]
+  (card/feature-card
+   {:color colors/canvas-light
+    :child
+    (f/column
+     {:cross-axis-alignment :center
+      :padding (f/edge-insets.all spacing/xl)}
+     (f/text "Import CSV"
+             {:style (f/text-style
+                      {:color (f/color.hex colors/ink)
+                       :font-size typography/heading-md
+                       :font-weight 500})})
+     (f/sized-box :height spacing/sm)
+     (f/text "Select a CSV file to import transactions."
+             {:style (f/text-style
+                      {:color (f/color.hex "#666")
+                       :font-size typography/body-md})})
+     (f/sized-box :height spacing/lg)
+     (btn/pill-button
+      {:label "Select CSV File"
+       :color colors/ink
+       :text-color colors/on-dark
+       :on-pressed on-file-picked})
+     (f/sized-box :height spacing/md)
+     (f/text "Supports Binance export and generic date,amount,description format."
+             {:style (f/text-style
+                      {:color (f/color.hex "#999")
+                       :font-size typography/body-sm})}))}))
+
+(defn- preview-table
+  "Preview parsed CSV rows in a table card."
+  [{:keys [rows mapping]}]
+  (card/feature-card
+   {:color colors/canvas-light
+    :child
+    (f/column
+     {:cross-axis-alignment :stretch
+      :padding (f/edge-insets.all spacing/xl)}
+     (f/text "Preview"
+             {:style (f/text-style
+                      {:color (f/color.hex colors/ink)
+                       :font-size typography/heading-sm
+                       :font-weight 500})})
+     (f/sized-box :height spacing/md)
+     (when (seq rows)
+       (apply f/column
+              {:cross-axis-alignment :stretch}
+              (map-indexed
+               (fn [i row]
+                 (f/container
+                  {:padding (f/edge-insets.symmetric :vertical spacing/sm)
+                   :decoration (when (even? i)
+                                 (f/box-decoration {:color (f/color.hex "#f8f8f8")}))}
+                  (f/text (str (clj->js row))
+                          {:style (f/text-style
+                                   {:color (f/color.hex colors/ink)
+                                    :font-size typography/body-sm})})))
+               (take 5 rows))))
+     (when (> (count rows) 5)
+       (f/sized-box :height spacing/sm)
+       (f/text (str "... and " (- (count rows) 5) " more rows")
+               {:style (f/text-style
+                        {:color (f/color.hex "#999")
+                         :font-size typography/body-sm})})))))
+
+(defn- progress-indicator
+  "Import progress with indeterminate bar."
+  []
+  (f/column
+   {:cross-axis-alignment :center
+    :padding (f/edge-insets.all spacing/xl)}
+   (f/linear-progress-indicator {:value nil})
+   (f/sized-box :height spacing/md)
+   (f/text "Importing transactions..."
+           {:style (f/text-style
+                    {:color (f/color.hex colors/ink)
+                     :font-size typography/body-md})})))
+
+(defn- success-view
+  "Import success result."
+  [{:keys [imported duplicates]}]
+  (card/feature-card
+   {:color colors/canvas-light
+    :child
+    (f/column
+     {:cross-axis-alignment :center
+      :padding (f/edge-insets.all spacing/xl)}
+     (f/text "✓"
+             {:style (f/text-style
+                      {:color (f/color.hex colors/accent-teal)
+                       :font-size 48})})
+     (f/sized-box :height spacing/md)
+     (f/text (str "Imported " imported " transactions")
+             {:style (f/text-style
+                      {:color (f/color.hex colors/accent-teal)
+                       :font-size typography/heading-sm
+                       :font-weight 500})})
+     (when (pos? duplicates)
+       (f/text (str duplicates " duplicates skipped")
+               {:style (f/text-style
+                        {:color (f/color.hex "#666")
+                         :font-size typography/body-sm})))
+     (f/sized-box :height spacing/lg)
+     (btn/pill-button
+      {:label "Done"
+       :on-pressed #(rd/dispatch [:set-active-tab 0])}))))
+
+(defn- error-view
+  "Import error result."
+  [{:keys [message]}]
+  (card/feature-card
+   {:color colors/canvas-light
+    :child
+    (f/column
+     {:cross-axis-alignment :center
+      :padding (f/edge-insets.all spacing/xl)}
+     (f/text "✗"
+             {:style (f/text-style
+                      {:color (f/color.hex colors/accent-danger)
+                       :font-size 48})})
+     (f/sized-box :height spacing/md)
+     (f/text (or message "Import failed")
+             {:style (f/text-style
+                      {:color (f/color.hex colors/accent-danger)
+                       :font-size typography/body-md})})
+     (f/sized-box :height spacing/lg)
+     (btn/pill-button
+      {:label "Try Again"
+       :color colors/ink
+       :text-color colors/on-dark
+       :on-pressed #(rd/dispatch [:import-csv-reset])}))))
+
+(defn import-view
+  "CSV import view with multiple states: initial, preview, importing, success, error."
+  []
+  (let [import-state @(rd/subscribe [:import-state])
+        status (:status import-state :idle)]
+    (f/container
+     {:color (f/color.hex colors/canvas-light)
+      :padding (f/edge-insets.all spacing/xl)}
+     (f/listview
+      {}
+      (cond
+        (= status :idle)
+        (file-picker-section
+         {:on-file-picked (fn []
+                            (println "File picker triggered")
+                            (rd/dispatch [:import-csv "path/to/file" {}]))})
+
+        (= status :preview)
+        (f/column
+         {:cross-axis-alignment :stretch}
+         (preview-table {:rows (:preview-rows import-state []) :mapping {}})
+         (f/sized-box :height spacing/md)
+         (btn/pill-button
+          {:label "Import"
+           :on-pressed #(rd/dispatch [:import-csv (get-in import-state [:file-path]) (get-in import-state [:mapping])])})
+
+        (= status :importing)
+        (progress-indicator)
+
+        (= status :success)
+        (success-view {:imported (get-in import-state [:result :imported] 0)
+                       :duplicates (get-in import-state [:result :duplicates] 0)})
+
+        (= status :error)
+        (error-view {:message (get-in import-state [:error])})
+
+        :else
+        (file-picker-section
+         {:on-file-picked (fn []
+                            (println "File picker triggered")
+                            (rd/dispatch [:import-csv "path/to/file" {}]))}))))))
