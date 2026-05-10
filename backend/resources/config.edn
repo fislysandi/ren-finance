@@ -1,0 +1,8 @@
+{:db/storage-path "./data/ren-finance"
+ :server/http-port 3000
+ :mcp/transport :stdio
+ :mcp/http-port 3999
+ :cors/allowed-origins ["http://localhost:*"]
+ :log/level :info
+ :currency/default :USD
+ :sync/wallet-refresh-hours 6}
