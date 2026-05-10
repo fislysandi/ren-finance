@@ -1,7 +1,6 @@
 (ns ren-finance.mcp.server
   (:require [co.gaiwan.mcp :as mcp]
             [co.gaiwan.mcp.state :as mcp-state]
-            [co.gaiwan.mcp.system.http :as http]
             [ren-finance.mcp.tools :as tools]
             [ren-finance.mcp.resources :as resources]
             [clojure.tools.logging :as log]))
@@ -61,14 +60,12 @@
       (mcp/run-http! {:port http-port})
       (log/info "MCP HTTP server started on port" http-port))
     (do
-      (mcp/run-stdio! nil)
+      (mcp/run-stdio! {})
       (log/info "MCP STDIO server started"))))
 
 (defn stop-mcp!
-  "Stop MCP HTTP server. Resets global state."
-  [jetty]
-  (when jetty
-    (log/info "Stopping MCP HTTP server...")
-    (http/stop! jetty)
-    (reset! mcp-state/state (mcp-state/initial-state))
-    (log/info "MCP server stopped.")))
+  "Stop MCP server. Gaiwan SDK's run-stdio!/run-http! are blocking —
+   this is a no-op for STDIO. For HTTP, stop the Jetty server
+   by calling the SDK's http/stop! with the returned instance."
+  []
+  (log/info "MCP server stopping..."))
