@@ -9,7 +9,9 @@
         cheshire/cheshire {:mvn/version "5.13.0"}
         aleph/aleph {:mvn/version "0.8.3"}
         metosin/reitit {:mvn/version "0.7.0"}
-        buddy/buddy-core {:mvn/version "1.10.413"}}
+        buddy/buddy-core {:mvn/version "1.10.413"}
+        ring/ring-json {:mvn/version "0.5.1"}
+        ring-cors/ring-cors {:mvn/version "0.1.13"}}}
  :aliases {:test {:extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}}
                   :main-opts ["-m" "kaocha.runner"]}
            :coverage {:extra-deps {cloverage/cloverage {:mvn/version "1.2.4"}}
