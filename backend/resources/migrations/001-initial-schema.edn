@@ -1,0 +1,4 @@
+;; Initial schema migration - schema is loaded programmatically via ren-finance.db.schema
+;; This file contains seed data only
+{:migration/version 1
+ :migration/description "Seed default categories"}
