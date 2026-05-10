@@ -2,23 +2,84 @@
   (:require [re-dash.core :as rd]
             [ren-finance.api.client :as api]))
 
-;; These effects will be implemented in Task 15
+;; ─── Cache / Offline Support ──────────────────────────────────────
+
+;; On mobile (Flutter via ClojureDart), js/localStorage is unavailable.
+;; Replace the two cache effects below with shared_preferences interop:
+;;
+;;   (.. (.getInstance shared_preferences/SharedPreferences)
+;;       (.then (fn [prefs]
+;;                (.getString prefs "ren-finance-cache"))))
+;;
+;;   (.. (.getInstance shared_preferences/SharedPreferences)
+;;       (.then (fn [prefs]
+;;                (.setString prefs "ren-finance-cache" json-str))))
+;;
+;; localStorage is the default for web.
+
+(rd/reg-fx
+ :save-cache
+ (fn [data]
+   ;; Store in localStorage for offline access on web.
+   (try
+     (when (exists? js/localStorage)
+       (.. js/localStorage
+           (setItem "ren-finance-cache"
+                    (.stringify js/JSON (clj->js data)))))
+     (catch js/Error e
+       (println "Cache save failed:" (.message e))))))
+
+(rd/reg-fx
+ :load-cache
+ (fn [_]
+   (try
+     (when (exists? js/localStorage)
+       (let [cached (.. js/localStorage (getItem "ren-finance-cache"))]
+         (when cached
+           (let [data (js->clj (.parse js/JSON cached) :keywordize-keys true)]
+             (rd/dispatch [:cache-loaded data])))))
+     (catch js/Error e
+       (println "Cache load failed:" (.message e))))))
+
+;; ─── Network Effects ──────────────────────────────────────────────
+
 (rd/reg-fx
  :fetch-net-worth
  (fn [_]
-   (println "[:fx :fetch-net-worth] Not yet implemented — Task 15")))
+   (try
+     (let [data (api/fetch-net-worth)]
+       (rd/dispatch [:net-worth-loaded data])
+       ;; Cache the latest data for offline use.
+       (rd/dispatch [:save-cache {:net-worth data}]))
+     (catch js/Error e
+       (rd/dispatch [:net-worth-loaded {:error (.message e)}])
+       (rd/dispatch [:set-offline true])))))
 
 (rd/reg-fx
  :fetch-settings
  (fn [_]
-   (println "[:fx :fetch-settings] Not yet implemented — Task 15")))
+   (try
+     (let [data (api/fetch-settings)]
+       (rd/dispatch [:settings-loaded data])
+       (rd/dispatch [:save-cache {:settings data}]))
+     (catch js/Error e
+       (println "Failed to fetch settings:" (.message e))
+       (rd/dispatch [:set-offline true])))))
 
 (rd/reg-fx
  :save-setting
- (fn [_]
-   (println "[:fx :save-setting] Not yet implemented — Task 15")))
+ (fn [{:keys [currency]}]
+   (try
+     (let [data (api/save-base-currency currency)]
+       (rd/dispatch [:setting-saved data]))
+     (catch js/Error e
+       (println "Failed to save setting:" (.message e))))))
 
 (rd/reg-fx
  :import-csv
- (fn [_]
-   (println "[:fx :import-csv] Not yet implemented — Task 15")))
+ (fn [{:keys [file-path mapping]}]
+   (try
+     (let [data (api/import-csv-file file-path mapping)]
+       (rd/dispatch [:import-completed data]))
+     (catch js/Error e
+       (println "Import failed:" (.message e))))))

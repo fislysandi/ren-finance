@@ -1,16 +1,75 @@
 (ns ren-finance.api.client
-  (:require [cljd.http :as http]))
+  (:require [cljd.http :as http]
+            [clojure.string :as str]))
 
-(def ^:dynamic *api-base* "/api")
+(def ^:dynamic *api-base*
+  "Base URL for backend API. Override for mobile deployment."
+  (or (when-let [env (.. js/process -env -API_BASE_URL)]
+        env)
+      "/api"))
 
 (defn fetch-json
-  "Fetch JSON from backend API endpoint."
+  "Fetch JSON from backend. Returns parsed data or throws."
   [path]
-  (http/get (str *api-base* path) {:headers {"Accept" "application/json"}}))
+  (let [url (str *api-base* path)
+        response (http/get url {:headers {"Accept" "application/json"}
+                                :timeout 10000})
+        ;; cljd.http/get may return a Response object or a map.
+        ;; Handle both shapes.
+        status (if (satisfies? IDeref response)
+                 (.-statusCode response)
+                 (or (:status response) (.-statusCode response)))
+        body (if (satisfies? IDeref response)
+               (.-body response)
+               (or (:body response) (.-body response)))]
+    (if (= 200 status)
+      (js->clj (.parse js/JSON body) :keywordize-keys true)
+      (throw (js/Error. (str "HTTP " status ": " (pr-str body)))))))
 
 (defn post-json
-  "POST JSON to backend API endpoint."
+  "POST JSON body to backend. Returns parsed data."
   [path body]
-  (http/post (str *api-base* path)
-             {:headers {"Content-Type" "application/json"}
-              :body (js/JSON.stringify (clj->js body))}))
+  (let [url (str *api-base* path)
+        response (http/post url
+                            {:headers {"Content-Type" "application/json"}
+                             :body (.stringify js/JSON (clj->js body))
+                             :timeout 15000})
+        status (if (satisfies? IDeref response)
+                 (.-statusCode response)
+                 (or (:status response) (.-statusCode response)))
+        body-str (if (satisfies? IDeref response)
+                   (.-body response)
+                   (or (:body response) (.-body response)))]
+    (if (#{200 201} status)
+      (js->clj (.parse js/JSON body-str) :keywordize-keys true)
+      (throw (js/Error. (str "HTTP " status ": " (pr-str body-str)))))))
+
+(defn fetch-net-worth
+  "GET /api/net-worth. Returns {:total :by-type :last-sync}."
+  []
+  (let [response (fetch-json "/api/net-worth")]
+    (get response :data response)))
+
+(defn fetch-settings
+  "GET /api/settings. Returns {:base-currency :wallets}."
+  []
+  (let [response (fetch-json "/api/settings")]
+    (get response :data response)))
+
+(defn save-base-currency
+  "PUT /api/settings/base-currency. Body: {:currency keyword}."
+  [currency]
+  (let [response (post-json "/api/settings/base-currency" {:currency (name currency)})]
+    (get response :data response)))
+
+(defn import-csv-file
+  "POST /api/import/csv. Sends file path — in real impl uses multipart."
+  [file-path mapping]
+  (let [response (post-json "/api/import/csv" {:file-path file-path :mapping mapping})]
+    (get response :data response)))
+
+(defn sync-wallets
+  "POST /api/wallets/sync. Body: {:addresses [string]}."
+  [addresses]
+  (let [response (post-json "/api/wallets/sync" {:addresses addresses})]
+    (get response :data response)))

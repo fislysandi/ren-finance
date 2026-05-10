@@ -61,6 +61,11 @@
    (assoc-in db [:import :result] result)))
 
 (rd/reg-event-db
+ :cache-loaded
+ (fn [db [_ data]]
+   (merge db data)))
+
+(rd/reg-event-db
  :set-offline
  (fn [db [_ offline?]]
    (assoc-in db [:ui :offline?] offline?)))

@@ -2,10 +2,13 @@
   (:require [cljd.flutter :as f]
             [ren-finance.theme.colors :as colors]
             [ren-finance.model.subs :as subs]
+            [ren-finance.model.effects :as effects]
             [ren-finance.model.events :as events]
             [ren-finance.views.dashboard :as dashboard]
             [ren-finance.views.import :as import-view]
-            [ren-finance.views.settings :as settings-view]))
+            [ren-finance.views.settings :as settings-view]
+            [ren-finance.views.widgets.nav :as nav]
+            [re-dash.core :as rd]))
 
 (defn app []
   (f/material-app
@@ -16,4 +19,12 @@
              :scaffold-background-color colors/canvas-dark})}))
 
 (defn main []
+  ;; Load cached data on startup — restores state from previous session.
+  (try
+    (rd/dispatch [:load-cache])
+    (catch js/Error _ nil))
+  ;; Initial data fetch from backend.
+  (try
+    (rd/dispatch [:load-dashboard])
+    (catch js/Error _ nil))
   (f/run-app (app)))
