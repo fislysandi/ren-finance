@@ -6,167 +6,55 @@
             [ren-finance.theme.spacing :as spacing]
             [ren-finance.views.widgets.card :as card]
             [ren-finance.views.widgets.button :as btn]
-            [ren-finance.model.events :as events])
+            [ren-finance.model.events :as events]))
 
-(defn- net-worth-display
-  "Big 80px net worth figure with currency."
-  [{:keys [total last-sync]}]
-  (f/column
-   {:cross-axis-alignment :center
-    :padding (f/edge-insets.all spacing/section)}
-   (f/text "Net Worth"
-           {:style (f/text-style
-                    {:color (f/color.hex colors/on-dark-muted)
-                     :font-size typography/heading-sm
-                     :font-weight 500})})
-   (f/sized-box :height spacing/md)
-   (if total
-     (f/text (str "$" (format "%.2f" (double total)))
-             {:style (f/text-style
-                      {:color (f/color.hex colors/on-dark)
-                       :font-size typography/display-xl
-                       :font-weight 500
-                       :height 1.0})})
-     (f/text "—"
-             {:style (f/text-style
-                      {:color (f/color.hex colors/on-dark-muted)
-                       :font-size typography/display-xl
-                       :font-weight 500})}))
-   (f/sized-box :height spacing/sm)
-   (when last-sync
-     (f/text (str "Last synced: " last-sync)
-             {:style (f/text-style
-                      {:color (f/color.hex colors/on-dark-muted)
-                       :font-size typography/body-sm})}))))
-
-(defn- account-breakdown
-  "Cards showing balance by account type."
-  [accounts]
-  (f/padding
-   {:padding (f/edge-insets.symmetric :horizontal spacing/xl)}
-   (f/column
-    {:cross-axis-alignment :stretch}
-    (f/text "Accounts"
-            {:style (f/text-style
-                     {:color (f/color.hex colors/on-dark)
-                      :font-size typography/heading-md
-                      :font-weight 500})})
+(defn- net-worth-display [{:keys [total last-sync]}]
+  (f/column {:cross-axis-alignment :center :padding (f/edge-insets.all spacing/section)}
+    (f/text "Net Worth" {:style (f/text-style {:color (f/color.hex colors/on-dark-muted) :font-size typography/heading-sm :font-weight 500})})
     (f/sized-box :height spacing/md)
-    (if (seq accounts)
-      (apply f/column
-             {:cross-axis-alignment :stretch :gap spacing/md}
-             (map (fn [acct]
-                    (card/feature-card
-                     {:child
-                      (f/row
-                       {:main-axis-alignment :space-between
-                        :cross-axis-alignment :center}
-                       (f/column
-                        {:cross-axis-alignment :start}
-                        (f/text (:name acct)
-                                {:style (f/text-style
-                                         {:color (f/color.hex colors/on-dark)
-                                          :font-size typography/body-lg})})
-                        (f/text (name (:type acct))
-                                {:style (f/text-style
-                                         {:color (f/color.hex colors/on-dark-muted)
-                                          :font-size typography/body-sm})}))
-                       (f/text (str "$" (format "%.2f" (double (:balance acct))))
-                               {:style (f/text-style
-                                        {:color (f/color.hex colors/accent-teal)
-                                         :font-size typography/heading-sm
-                                         :font-weight 600})})))}))
-                  accounts))
-      (card/feature-card
-       {:child
-        (f/text "No accounts yet. Import a CSV or add a wallet."
-                {:style (f/text-style
-                         {:color (f/color.hex colors/on-dark-muted)
-                          :font-size typography/body-md}})})})))))
+    (if total
+      (f/text (str "$" (format "%.2f" (double total))) {:style (f/text-style {:color (f/color.hex colors/on-dark) :font-size typography/display-xl :font-weight 500 :height 1.0})})
+      (f/text "---" {:style (f/text-style {:color (f/color.hex colors/on-dark-muted) :font-size typography/display-xl :font-weight 500})}))
+    (f/sized-box :height spacing/sm)
+    (when last-sync
+      (f/text (str "Last synced: " last-sync) {:style (f/text-style {:color (f/color.hex colors/on-dark-muted) :font-size typography/body-sm})}))))
 
-(defn- empty-state
-  "First-launch state with CTAs."
-  []
-  (f/column
-   {:main-axis-alignment :center
-    :cross-axis-alignment :center
-    :padding (f/edge-insets.all spacing/section)}
-   (f/text "Welcome to Ren Finance"
-           {:style (f/text-style
-                    {:color (f/color.hex colors/on-dark)
-                     :font-size typography/heading-lg
-                     :font-weight 500})})
-   (f/sized-box :height spacing/md)
-   (f/text "Connect your first wallet or import a CSV to get started."
-           {:style (f/text-style
-                    {:color (f/color.hex colors/on-dark-muted)
-                     :font-size typography/body-md})})
-   (f/sized-box :height spacing/xl)
-   (btn/pill-button
-    {:label "Add Wallet"
-     :on-pressed #(rd/dispatch [:set-active-tab 2])})
-   (f/sized-box :height spacing/md)
-   (btn/pill-button
-    {:label "Import CSV"
-     :on-pressed #(rd/dispatch [:set-active-tab 1])})))
+(defn- empty-state []
+  (f/column {:main-axis-alignment :center :cross-axis-alignment :center :padding (f/edge-insets.all spacing/section)}
+    (f/text "Welcome to Ren Finance" {:style (f/text-style {:color (f/color.hex colors/on-dark) :font-size typography/heading-lg :font-weight 500})})
+    (f/sized-box :height spacing/md)
+    (f/text "Connect your first wallet or import a CSV." {:style (f/text-style {:color (f/color.hex colors/on-dark-muted) :font-size typography/body-md})})
+    (f/sized-box :height spacing/xl)
+    (btn/pill-button {:label "Add Wallet" :on-pressed #(rd/dispatch [:set-active-tab 2])})
+    (f/sized-box :height spacing/md)
+    (btn/pill-button {:label "Import CSV" :on-pressed #(rd/dispatch [:set-active-tab 1])})))
 
-(defn- error-banner
-  "Error state banner."
-  [{:keys [message on-retry]}]
-  (f/container
-   {:color (f/color.hex "#fef3cd")
-    :padding (f/edge-insets.all spacing/md)}
-   (f/row
-    {:cross-axis-alignment :center}
-    (f/text (str "⚠ " message)
-            {:style (f/text-style
-                     {:color (f/color.hex "#856404")
-                      :font-size typography/body-sm})})
-    (f/sized-box :width spacing/md)
-    (when on-retry
-      (f/text-button
-       {:on-pressed on-retry}
-       (f/text "Retry" {:style (f/text-style {:color (f/color.hex colors/primary)})})))))
-
-(defn dashboard
-  "Main dashboard view. Shows net worth, account breakdown, and charts.
-   Handles loading, empty, error, and stale states."
-  []
+(defn dashboard []
   (let [net-worth-data (rd/subscribe [:net-worth])
         accounts (rd/subscribe [:accounts])
         loading? (rd/subscribe [:loading?])
-        offline? (rd/subscribe [:offline?])
-        error (:error net-worth-data)]
-    ;; Initial load
+        offline? (rd/subscribe [:offline?])]
     (f/init-effect #(rd/dispatch [:load-dashboard]))
-    (f/refresh-indicator
-     {:on-refresh #(rd/dispatch [:load-dashboard])}
-     (f/container
-      {:color (f/color.hex colors/canvas-dark)}
-      (if loading?
-        ;; Skeleton loading state
-        (f/column
-         {:cross-axis-alignment :center
-          :padding (f/edge-insets.all spacing/section)}
-         (f/sized-box :height 80 :width 200 :child (f/container {:color (f/color.hex "#333") :decoration (f/box-decoration {:border-radius (f/border-radius.circular 4)})}))
-         (f/sized-box :height spacing/md)
-         (f/sized-box :height 16 :width 150 :child (f/container {:color (f/color.hex "#333") :decoration (f/box-decoration {:border-radius (f/border-radius.circular 4)})})))
-        (f/list-view
-         {}
-         ;; Error banner
-         (when offline?
-           (error-banner
-            {:message "Unable to connect to backend. Showing cached data."
-             :on-retry #(rd/dispatch [:load-dashboard])}))
-         (when error
-           (error-banner
-            {:message error
-             :on-retry #(rd/dispatch [:load-dashboard])}))
-         ;; Empty state
-         (if (and (empty? accounts) (nil? net-worth-data))
-           (empty-state)
-           ;; Normal state
-           (f/column
-            {:cross-axis-alignment :stretch}
-            (net-worth-display net-worth-data)
-            (account-breakdown accounts)))))))))
+    (f/refresh-indicator {:on-refresh #(rd/dispatch [:load-dashboard])}
+      (f/container {:color (f/color.hex colors/canvas-dark)}
+        (if loading?
+          (f/text "Loading..." {:style (f/text-style {:color (f/color.hex colors/on-dark)})})
+          (f/list-view {}
+            (when offline?
+              (f/container {:color (f/color.hex "#fef3cd") :padding (f/edge-insets.all spacing/md)}
+                (f/text "Offline - showing cached data" {:style (f/text-style {:color (f/color.hex "#856404")})})))
+            (if (and (empty? accounts) (nil? net-worth-data))
+              (empty-state)
+              (f/column {:cross-axis-alignment :stretch}
+                (net-worth-display net-worth-data)
+                (f/text "Accounts" {:style (f/text-style {:color (f/color.hex colors/on-dark) :font-size typography/heading-md :font-weight 500})})
+                (f/sized-box :height spacing/md)
+                (apply f/column {:cross-axis-alignment :stretch :gap spacing/md}
+                  (map (fn [acct]
+                    (card/feature-card {:child
+                      (f/row {:main-axis-alignment :space-between :cross-axis-alignment :center}
+                        (f/column {:cross-axis-alignment :start}
+                          (f/text (:name acct) {:style (f/text-style {:color (f/color.hex colors/on-dark) :font-size typography/body-lg})})
+                          (f/text (name (:type acct)) {:style (f/text-style {:color (f/color.hex colors/on-dark-muted) :font-size typography/body-sm})}))
+                        (f/text (str "$" (format "%.2f" (double (:balance acct)))) {:style (f/text-style {:color (f/color.hex colors/accent-teal) :font-size typography/heading-sm :font-weight 600})})))}))
+                  accounts))))))))))
