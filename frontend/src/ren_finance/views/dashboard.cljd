@@ -56,5 +56,5 @@
                         (f/column {:cross-axis-alignment :start}
                           (f/text (:name acct) {:style (f/text-style {:color (f/color.hex colors/on-dark) :font-size typography/body-lg})})
                           (f/text (name (:type acct)) {:style (f/text-style {:color (f/color.hex colors/on-dark-muted) :font-size typography/body-sm})}))
-                        (f/text (str "$" (format "%.2f" (double (:balance acct)))) {:style (f/text-style {:color (f/color.hex colors/accent-teal) :font-size typography/heading-sm :font-weight 600})})))}))
-                  accounts))))))))))
+                        (f/text (str "$" (format "%.2f" (double (:balance acct)))) {:style (f/text-style {:color (f/color.hex colors/accent-teal) :font-size typography/heading-sm :font-weight 600})})))})
+                  accounts)))))))))
