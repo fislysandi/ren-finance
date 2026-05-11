@@ -1,5 +1,2 @@
-(ns ren-finance.views.widgets.card
-  (:require [cljd.flutter :as f]))
-
-(defn feature-card [{:keys [child margin color] :or {color "#16181a" margin 0}}]
-  child)
+(ns ren-finance.views.widgets.card)
+(defn feature-card [{:keys [child margin color]}] child)
