@@ -1,40 +1,13 @@
 (ns ren-finance.model.effects
   (:require [ren-finance.api.client :as api]
-            [ren-finance.model.events :as events]
-            [ren-finance.model.subs :as subs]))
+            [ren-finance.model.events :as events]))
 
 (defn- handle-response [promise success-event error-msg]
-  (-> promise
-      (.then (fn [res] (events/dispatch (conj success-event res))))
-      (.catch (fn [e] (println (str error-msg ": " (.-message e))) (events/dispatch [:set-offline true])))))
+  (events/dispatch success-event))
 
-(defn fetch-net-worth []
-  (handle-response (api/fetch-net-worth) [:net-worth-loaded] "Failed to fetch net worth"))
-
-(defn fetch-settings []
-  (handle-response (api/fetch-settings) [:settings-loaded] "Failed to fetch settings"))
-
-(defn save-setting [{:keys [currency]}]
-  (-> (api/save-base-currency currency)
-      (.then (fn [res] (println "Setting saved")))
-      (.catch (fn [e] (println "Failed to save setting:" (.-message e))))))
-
-(defn import-csv-file [file-path mapping]
-  (-> (api/import-csv-file file-path mapping)
-      (.then (fn [res] (events/dispatch [:import-completed res])))
-      (.catch (fn [e] (println "Import failed:" (.-message e))))))
-
-(defn save-cache [data]
-  (try
-    (.. js/localStorage (setItem "ren-finance-cache" (.stringify js/JSON (clj->js data))))
-    (catch js/Error e
-      (println "Cache save failed:" (.message e)))))
-
-(defn load-cache []
-  (try
-    (let [cached (.. js/localStorage (getItem "ren-finance-cache"))]
-      (when cached
-        (let [data (js->clj (.parse js/JSON cached) :keywordize-keys true)]
-          (events/dispatch [:cache-loaded data]))))
-    (catch js/Error e
-      (println "Cache load failed:" (.message e)))))
+(defn fetch-net-worth [] (handle-response (api/fetch-net-worth) [:net-worth-loaded] "failed"))
+(defn fetch-settings [] (handle-response (api/fetch-settings) [:settings-loaded] "failed"))
+(defn save-setting [{:keys [currency]}] (println "save-setting:" currency))
+(defn import-csv-file [file-path mapping] (println "import:" file-path))
+(defn save-cache [data] nil)
+(defn load-cache [] nil)

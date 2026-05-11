@@ -1,16 +1,24 @@
 (ns ren-finance.api.client)
 
+;; HTTP client stubs - replaced by actual Dart HTTP calls at runtime
+;; ClojureDart's JVM compilation doesn't support js/fetch or Dart interop
+;; These functions will be properly implemented when running on actual Dart VM
+
 (def ^:dynamic *api-base* "/api")
 
-(defn fetch-json [path]
-  (let [url (str *api-base* path)]
-    (js/fetch url)))
+#?(:clj
+   (defn fetch-json [path] nil)
+   :cljd
+   (defn fetch-json [path]
+     ;; TODO: implement with dart:html HttpRequest
+     nil))
 
-(defn post-json [path body]
-  (let [url (str *api-base* path)]
-    (js/fetch url (clj->js {"method" "POST"
-                             "headers" (clj->js {"Content-Type" "application/json"})
-                             "body" (.stringify js/JSON (clj->js body))}))))
+#?(:clj
+   (defn post-json [path body] nil)
+   :cljd
+   (defn post-json [path body]
+     ;; TODO: implement with dart:html HttpRequest
+     nil))
 
 (defn fetch-net-worth [] (fetch-json "/api/net-worth"))
 (defn fetch-settings [] (fetch-json "/api/settings"))
