@@ -24,3 +24,18 @@ frontend/macos/Pods/
 .clj-kondo/
 .lsp/
 .cpcache/
+
+# ClojureDart build cache
+.clojuredart/
+.cpcache/
+frontend/.clojuredart/
+frontend/.cpcache/
+frontend/build/
+frontend/lib/cljd-out/
+frontend/.dart_tool/
+frontend/.flutter-plugins*
+frontend/android/.gradle/
+frontend/android/.idea/
+frontend/ios/Pods/
+frontend/macos/Pods/
+frontend/pubspec.lock
