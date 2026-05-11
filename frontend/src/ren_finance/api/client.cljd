@@ -1,5 +1,4 @@
-(ns ren-finance.api.client
-  (:require [clojure.string :as str]))
+(ns ren-finance.api.client)
 
 (def ^:dynamic *api-base* "/api")
 
@@ -9,9 +8,9 @@
 
 (defn post-json [path body]
   (let [url (str *api-base* path)]
-    (js/fetch url #js {"method" "POST"
-                       "headers" #js {"Content-Type" "application/json"}
-                       "body" (.stringify js/JSON (clj->js body))})))
+    (js/fetch url (clj->js {"method" "POST"
+                             "headers" (clj->js {"Content-Type" "application/json"})
+                             "body" (.stringify js/JSON (clj->js body))}))))
 
 (defn fetch-net-worth [] (fetch-json "/api/net-worth"))
 (defn fetch-settings [] (fetch-json "/api/settings"))
