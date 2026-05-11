@@ -1,7 +1,7 @@
 {:paths ["src"]
  :deps {io.github.fislysandi/clojuredart
         {:git/url "https://github.com/fislysandi/ClojureDart"
-         :git/sha "d2229fd07cc5b4bc100bcff1534ec8f9efec58bd"}}
+         :git/sha "bc0ea42b25a558f108ca774b7d1ee4b2e2bc6b7e"}}
  :aliases {:cljd {:main-opts ["-m" "cljd.build"]}}
  :cljd/opts {:kind :flutter
              :main ren-finance.main}}
