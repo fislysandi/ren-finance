@@ -1,21 +1,13 @@
 (ns ren-finance.model.events
-  (:require [ren-finance.model.subs :as subs]
-            [ren-finance.model.effects :as effects]))
+  (:require [ren-finance.model.subs :as subs]))
 
-(defn dispatch [event & args]
-  (let [[ev-type & ev-args] (if (vector? event) event [event args])]
+(defn dispatch [event]
+  (let [[ev-type & ev-args] (if (vector? event) event [event])]
     (case ev-type
       :set-active-tab (swap! subs/app-state assoc :active-tab (first ev-args))
-      :load-dashboard (effects/fetch-net-worth)
       :net-worth-loaded (swap! subs/app-state assoc :net-worth (first ev-args))
       :settings-loaded (swap! subs/app-state assoc :settings (first ev-args))
-      :set-base-currency (swap! subs/app-state assoc-in [:settings :base-currency] (first ev-args))
-      :save-base-currency (effects/save-setting {:currency (first ev-args)})
-      :setting-saved (println "Setting saved")
-      :import-csv (let [{:keys [file-path mapping]} (first ev-args)]
-                   (effects/import-csv-file file-path mapping))
       :import-completed (swap! subs/app-state assoc-in [:import :result] (first ev-args))
-      :set-offline (swap! subs/app-state assoc-in [:ui :offline?] (first ev-args))
-      :cache-loaded (let [data (first ev-args)] (swap! subs/app-state merge data))
-      :load-cache (effects/load-cache)
+      :cache-loaded (when-let [data (first ev-args)] (swap! subs/app-state merge data))
+      :set-offline (swap! subs/app-state assoc-in [:ui :offline?] true)
       (println "Unknown event:" ev-type))))

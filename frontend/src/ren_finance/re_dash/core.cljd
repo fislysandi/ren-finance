@@ -1,10 +1,18 @@
 (ns re-dash.core
   (:require [ren-finance.model.subs :as subs]
-            [ren-finance.model.events :as events]))
+            [ren-finance.model.events :as events]
+            [ren-finance.model.effects :as effects]))
 
 (defn dispatch [event & args]
-  (let [ev (if (vector? event) event (apply vector event args))]
-    (events/dispatch ev)))
+  (let [ev (if (vector? event) event (apply vector event args))
+        ev-type (first ev)]
+    (case ev-type
+      :load-dashboard (effects/fetch-net-worth)
+      :load-cache (effects/load-cache)
+      :save-base-currency (effects/save-setting {:currency (second ev)})
+      :import-csv (effects/import-csv-file (get (second ev) :file-path) (get (second ev) :mapping))
+      ;; Default: forward to events for state changes
+      (events/dispatch ev))))
 
 (defn subscribe [key]
   (let [k (if (vector? key) (first key) key)]
