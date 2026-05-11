@@ -4,4 +4,4 @@
          :git/sha "7c428315ad27df39095e2a00e93564621ed727e6"}}
  :aliases {:cljd {:main-opts ["-m" "cljd.build"]}}
  :cljd/opts {:kind :flutter
-             :main 'ren-finance.main}}
+             :main ren-finance.main}}
