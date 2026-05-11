@@ -11,4 +11,4 @@
               .home (material/Text "Hello from Ren Finance!"))))
 
 (defn main []
-  (f/run-app (app)))
+  (f/run (app)))
