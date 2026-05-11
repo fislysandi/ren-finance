@@ -5,4 +5,4 @@ ENV PATH="/opt/flutter/bin:${PATH}"
 RUN flutter config --no-analytics
 WORKDIR /build
 COPY frontend/ /build/frontend/
-RUN cd frontend && flutter pub get 2>&1 && clojure -M:cljd compile 2>&1; echo "CLJD_EXIT=$?"
+RUN cd frontend && flutter pub get 2>&1 && clojure -M:cljd compile 2>&1 && flutter build web --release 2>&1 && mkdir -p /output && cp -r build/web /output/
