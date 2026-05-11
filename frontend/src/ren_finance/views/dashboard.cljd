@@ -1,4 +1,4 @@
-ns ren-finance.views.dashboard
+(ns ren-finance.views.dashboard
   (:require [cljd.flutter :as f]
             [re-dash.core :as rd]
             [ren-finance.theme.colors :as colors]
@@ -169,4 +169,4 @@ ns ren-finance.views.dashboard
            (f/column
             {:cross-axis-alignment :stretch}
             (net-worth-display net-worth-data)
-            (account-breakdown accounts))))))))
+            (account-breakdown accounts)))))))))
