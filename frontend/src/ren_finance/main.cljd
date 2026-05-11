@@ -1,20 +1,14 @@
 (ns ren-finance.main
   (:require [cljd.flutter :as f]
+            ["package:flutter/material.dart" :as material]
             [ren-finance.model.subs :as subs]
-            [ren-finance.model.effects :as effects]
-            [ren-finance.model.events :as events]
             [re-dash.core :as rd]))
 
 (defn app []
   (f/widget (material/MaterialApp
               .title "Ren Finance"
-              .theme (material/ThemeData
-                       .useMaterial3 true
-                       .brightness widgets/Brightness.dark)
-              .home (f/widget (material/Scaffold
-                               .appBar (material/AppBar .title (material/Text "Ren Finance"))
-                               .body (f/widget (material/Center)
-                                       (material/Text "Welcome to Ren Finance")))))))
+              .theme (material/ThemeData .useMaterial3 true)
+              .home (material/Text "Hello from Ren Finance!"))))
 
 (defn main []
   (f/run-app (app)))
