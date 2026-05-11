@@ -2,7 +2,7 @@
  :deps {io.github.fislysandi/clojuredart
         {:git/url "https://github.com/fislysandi/ClojureDart"
          :git/sha "d8e4779e09f4f28c346748303a3a25537d44dd58"}
-        htih/re-dash
+        io.github.htihospitality/re-dash
         {:git/url "https://github.com/htihospitality/re-dash"
          :git/sha "1d9f116932ca251c558c46a399dbf751bd817d93"}}
  :aliases {:cljd {:main-opts ["-m" "cljd.build"]}}
