@@ -169,4 +169,4 @@ ns ren-finance.views.dashboard
            (f/column
             {:cross-axis-alignment :stretch}
             (net-worth-display net-worth-data)
-            (account-breakdown accounts)))))))))
+            (account-breakdown accounts))))))))

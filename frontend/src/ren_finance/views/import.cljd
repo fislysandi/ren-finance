@@ -182,4 +182,4 @@
         (file-picker-section
          {:on-file-picked (fn []
                             (println "File picker triggered")
-                            (rd/dispatch [:import-csv "path/to/file" {}]))}))))))
+                            (rd/dispatch [:import-csv "path/to/file" {}]))})))))))))))
