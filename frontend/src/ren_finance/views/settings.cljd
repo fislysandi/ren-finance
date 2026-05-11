@@ -24,7 +24,7 @@
 (defn- base-currency-selector
   "Dropdown to select base currency for net worth."
   []
-  (let [base-currency @(rd/subscribe [:base-currency])]
+  (let [base-currency (rd/subscribe [:base-currency])]
     (card/feature-card
      {:color colors/canvas-light
       :child
@@ -97,7 +97,7 @@
 (defn- wallet-management
   "Add/remove wallet addresses."
   []
-  (let [wallets @(rd/subscribe [:wallets])]
+  (let [wallets (rd/subscribe [:wallets])]
     (defonce address-val (atom ""))
     (defonce chain-val (atom "ETH"))
     (card/feature-card
@@ -182,7 +182,7 @@
 (defn settings-view
   "Settings view with base currency, wallet management, and CSV mapping presets."
   []
-  (let [loading? @(rd/subscribe [:loading?])]
+  (let [loading? (rd/subscribe [:loading?])]
     (rd/dispatch [:load-dashboard])
     (f/container
      {:color (f/color.hex colors/canvas-light)

@@ -1,52 +1,14 @@
-(ns ren-finance.model.subs
-  (:require [re-dash.core :as rd]))
+(ns ren-finance.model.subs)
 
-(rd/reg-sub
- :net-worth
- (fn [db _]
-   (:net-worth db)))
+(def app-state (atom {:active-tab 0
+                      :net-worth nil
+                      :accounts []
+                      :transactions {:items [] :total 0 :loading? false}
+                      :settings {:base-currency :USD :wallets []}
+                      :import {:status :idle :preview-rows [] :result nil :error nil}
+                      :cache {}
+                      :ui {:loading? false :error nil :offline? false}}))
 
-(rd/reg-sub
- :accounts
- (fn [db _]
-   (:accounts db)))
-
-(rd/reg-sub
- :settings
- (fn [db _]
-   (:settings db)))
-
-(rd/reg-sub
- :base-currency
- (fn [db _]
-   (get-in db [:settings :base-currency] :USD)))
-
-(rd/reg-sub
- :wallets
- (fn [db _]
-   (get-in db [:settings :wallets] [])))
-
-(rd/reg-sub
- :transactions
- (fn [db _]
-   (:transactions db)))
-
-(rd/reg-sub
- :active-tab
- (fn [db _]
-   (:active-tab db 0)))
-
-(rd/reg-sub
- :import-state
- (fn [db _]
-   (:import db)))
-
-(rd/reg-sub
- :offline?
- (fn [db _]
-   (get-in db [:ui :offline?] false)))
-
-(rd/reg-sub
- :loading?
- (fn [db _]
-   (get-in db [:ui :loading?] false)))
+(defn subscribe [key]
+  (fn [db key] (get @db key))
+  (get @app-state key))

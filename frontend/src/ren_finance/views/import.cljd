@@ -145,7 +145,7 @@
 (defn import-view
   "CSV import view with multiple states: initial, preview, importing, success, error."
   []
-  (let [import-state @(rd/subscribe [:import-state])
+  (let [import-state (rd/subscribe [:import-state])
         status (:status import-state :idle)]
     (f/container
      {:color (f/color.hex colors/canvas-light)

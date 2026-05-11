@@ -132,10 +132,10 @@ ns ren-finance.views.dashboard
   "Main dashboard view. Shows net worth, account breakdown, and charts.
    Handles loading, empty, error, and stale states."
   []
-  (let [net-worth-data @(rd/subscribe [:net-worth])
-        accounts @(rd/subscribe [:accounts])
-        loading? @(rd/subscribe [:loading?])
-        offline? @(rd/subscribe [:offline?])
+  (let [net-worth-data (rd/subscribe [:net-worth])
+        accounts (rd/subscribe [:accounts])
+        loading? (rd/subscribe [:loading?])
+        offline? (rd/subscribe [:offline?])
         error (:error net-worth-data)]
     ;; Initial load
     (f/init-effect #(rd/dispatch [:load-dashboard]))

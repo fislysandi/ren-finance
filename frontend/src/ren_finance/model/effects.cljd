@@ -1,85 +1,50 @@
 (ns ren-finance.model.effects
-  (:require [re-dash.core :as rd]
-            [ren-finance.api.client :as api]))
+  (:require [ren-finance.api.client :as api]
+            [ren-finance.model.events :as events]
+            [ren-finance.model.subs :as subs]))
 
-;; ─── Cache / Offline Support ──────────────────────────────────────
+(defn fetch-net-worth []
+  (try
+    (let [data (api/fetch-net-worth)]
+      (events/dispatch [:net-worth-loaded data])
+      (events/dispatch [:save-cache {:net-worth data}]))
+    (catch js/Error e
+      (events/dispatch [:net-worth-loaded {:error (.message e)}])
+      (events/dispatch [:set-offline true]))))
 
-;; On mobile (Flutter via ClojureDart), js/localStorage is unavailable.
-;; Replace the two cache effects below with shared_preferences interop:
-;;
-;;   (.. (.getInstance shared_preferences/SharedPreferences)
-;;       (.then (fn [prefs]
-;;                (.getString prefs "ren-finance-cache"))))
-;;
-;;   (.. (.getInstance shared_preferences/SharedPreferences)
-;;       (.then (fn [prefs]
-;;                (.setString prefs "ren-finance-cache" json-str))))
-;;
-;; localStorage is the default for web.
+(defn fetch-settings []
+  (try
+    (let [data (api/fetch-settings)]
+      (events/dispatch [:settings-loaded data]))
+    (catch js/Error e
+      (println "Failed to fetch settings:" (.message e))
+      (events/dispatch [:set-offline true]))))
 
-(rd/reg-fx
- :save-cache
- (fn [data]
-   ;; Store in localStorage for offline access on web.
-   (try
-     (when (exists? js/localStorage)
-       (.. js/localStorage
-           (setItem "ren-finance-cache"
-                    (.stringify js/JSON (clj->js data)))))
-     (catch js/Error e
-       (println "Cache save failed:" (.message e))))))
+(defn save-setting [{:keys [currency]}]
+  (try
+    (let [data (api/save-base-currency currency)]
+      (events/dispatch [:setting-saved data]))
+    (catch js/Error e
+      (println "Failed to save setting:" (.message e)))))
 
-(rd/reg-fx
- :load-cache
- (fn [_]
-   (try
-     (when (exists? js/localStorage)
-       (let [cached (.. js/localStorage (getItem "ren-finance-cache"))]
-         (when cached
-           (let [data (js->clj (.parse js/JSON cached) :keywordize-keys true)]
-             (rd/dispatch [:cache-loaded data])))))
-     (catch js/Error e
-       (println "Cache load failed:" (.message e))))))
+(defn import-csv-file [file-path mapping]
+  (try
+    (let [data (api/import-csv-file file-path mapping)]
+      (events/dispatch [:import-completed data]))
+    (catch js/Error e
+      (println "Import failed:" (.message e)))))
 
-;; ─── Network Effects ──────────────────────────────────────────────
+(defn save-cache [data]
+  (try
+    (.. js/localStorage (setItem "ren-finance-cache" (.stringify js/JSON (clj->js data))))
+    (catch js/Error e
+      (println "Cache save failed:" (.message e)))))
 
-(rd/reg-fx
- :fetch-net-worth
- (fn [_]
-   (try
-     (let [data (api/fetch-net-worth)]
-       (rd/dispatch [:net-worth-loaded data])
-       ;; Cache the latest data for offline use.
-       (rd/dispatch [:save-cache {:net-worth data}]))
-     (catch js/Error e
-       (rd/dispatch [:net-worth-loaded {:error (.message e)}])
-       (rd/dispatch [:set-offline true])))))
-
-(rd/reg-fx
- :fetch-settings
- (fn [_]
-   (try
-     (let [data (api/fetch-settings)]
-       (rd/dispatch [:settings-loaded data])
-       (rd/dispatch [:save-cache {:settings data}]))
-     (catch js/Error e
-       (println "Failed to fetch settings:" (.message e))
-       (rd/dispatch [:set-offline true])))))
-
-(rd/reg-fx
- :save-setting
- (fn [{:keys [currency]}]
-   (try
-     (let [data (api/save-base-currency currency)]
-       (rd/dispatch [:setting-saved data]))
-     (catch js/Error e
-       (println "Failed to save setting:" (.message e))))))
-
-(rd/reg-fx
- :import-csv
- (fn [{:keys [file-path mapping]}]
-   (try
-     (let [data (api/import-csv-file file-path mapping)]
-       (rd/dispatch [:import-completed data]))
-     (catch js/Error e
-       (println "Import failed:" (.message e))))))
+(defn load-cache []
+  (try
+    (let [cached (.. js/localStorage (getItem "ren-finance-cache"))]
+      (when cached
+        (let [data (js->clj (.parse js/JSON cached) :keywordize-keys true)]
+          (events/dispatch [:cache-loaded data]))))
+    (catch js/Error e
+      (println "Cache load failed:" (.message e)))))

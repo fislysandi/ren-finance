@@ -8,7 +8,7 @@
 (defn nav-bar
   "Bottom navigation bar with 3 tabs: Dashboard, Import, Settings."
   []
-  (let [active-tab @(rd/subscribe [:active-tab])]
+  (let [active-tab (rd/subscribe [:active-tab])]
     (f/navigation-bar
      {:selected-index active-tab
       :on-destination-selected #(rd/dispatch [:set-active-tab %])

@@ -1,10 +1,7 @@
 {:paths ["src"]
  :deps {io.github.fislysandi/clojuredart
         {:git/url "https://github.com/fislysandi/ClojureDart"
-         :git/sha "d8e4779e09f4f28c346748303a3a25537d44dd58"}
-        io.github.htihospitality/re-dash
-        {:git/url "https://github.com/htihospitality/re-dash"
-         :git/sha "1d9f116932ca251c558c46a399dbf751bd817d93"}}
+         :git/sha "d8e4779e09f4f28c346748303a3a25537d44dd58"}}
  :aliases {:cljd {:main-opts ["-m" "cljd.build"]}}
  :cljd/opts {:kind :flutter
              :main ren-finance.main}}
