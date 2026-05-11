@@ -131,10 +131,10 @@
                   total-income (or (ffirst (d/q '[:find (sum ?amount)
                                                   :in $ ?start ?end
                                                   :where [?t :transaction/date ?date]
-                                                         [(>= ?date ?start)]
-                                                         [(<= ?date ?end)]
-                                                         [?t :transaction/amount ?amount]
-                                                         [(> ?amount 0)]]
+                                                  [(>= ?date ?start)]
+                                                  [(<= ?date ?end)]
+                                                  [?t :transaction/amount ?amount]
+                                                  [(> ?amount 0)]]
                                                 @c start-date end-date)) 0M)]
               {:content [{:type "text"
                           :text (str "Report: " (or (get args "start-date") (get args :start-date)) " → " (or (get args "end-date") (get args :end-date)) "\n"
@@ -148,4 +148,4 @@
              :isError true}))
         (catch Exception e
           {:content [{:type "text" :text (str "Error generating report: " (.getMessage e))}]
-           :isError true}))}])
+           :isError true})))}])

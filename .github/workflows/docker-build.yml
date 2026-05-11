@@ -1,0 +1,11 @@
+name: Docker Build
+
+on: [push, pull_request]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker
+        run: docker build . -f Dockerfile -t ren-finance 2>&1
