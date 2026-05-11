@@ -1,21 +1,13 @@
 name: ren_finance
-description: Ren Finance - Personal Finance Dashboard
+description: Ren Finance
 publish_to: 'none'
 version: 0.1.0+1
-
 environment:
   sdk: '>=3.2.0 <4.0.0'
-
 dependencies:
   flutter:
     sdk: flutter
-  syncfusion_flutter_charts: ^24.2.9
-  file_picker: ^8.0.0
-  shared_preferences: ^2.2.0
   http: ^1.2.0
-
-dev_dependencies:
-  flutter_lints: ^5.0.0
-
+dev_dependencies: {}
 flutter:
   uses-material-design: true
