@@ -3,36 +3,26 @@
             [ren-finance.model.events :as events]
             [ren-finance.model.subs :as subs]))
 
+(defn- handle-response [promise success-event error-msg]
+  (-> promise
+      (.then (fn [res] (events/dispatch (conj success-event res))))
+      (.catch (fn [e] (println (str error-msg ": " (.-message e))) (events/dispatch [:set-offline true])))))
+
 (defn fetch-net-worth []
-  (try
-    (let [data (api/fetch-net-worth)]
-      (events/dispatch [:net-worth-loaded data])
-      (events/dispatch [:save-cache {:net-worth data}]))
-    (catch js/Error e
-      (events/dispatch [:net-worth-loaded {:error (.message e)}])
-      (events/dispatch [:set-offline true]))))
+  (handle-response (api/fetch-net-worth) [:net-worth-loaded] "Failed to fetch net worth"))
 
 (defn fetch-settings []
-  (try
-    (let [data (api/fetch-settings)]
-      (events/dispatch [:settings-loaded data]))
-    (catch js/Error e
-      (println "Failed to fetch settings:" (.message e))
-      (events/dispatch [:set-offline true]))))
+  (handle-response (api/fetch-settings) [:settings-loaded] "Failed to fetch settings"))
 
 (defn save-setting [{:keys [currency]}]
-  (try
-    (let [data (api/save-base-currency currency)]
-      (events/dispatch [:setting-saved data]))
-    (catch js/Error e
-      (println "Failed to save setting:" (.message e)))))
+  (-> (api/save-base-currency currency)
+      (.then (fn [res] (println "Setting saved")))
+      (.catch (fn [e] (println "Failed to save setting:" (.-message e))))))
 
 (defn import-csv-file [file-path mapping]
-  (try
-    (let [data (api/import-csv-file file-path mapping)]
-      (events/dispatch [:import-completed data]))
-    (catch js/Error e
-      (println "Import failed:" (.message e)))))
+  (-> (api/import-csv-file file-path mapping)
+      (.then (fn [res] (events/dispatch [:import-completed res])))
+      (.catch (fn [e] (println "Import failed:" (.-message e))))))
 
 (defn save-cache [data]
   (try
